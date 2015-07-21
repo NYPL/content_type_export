@@ -1,1 +1,7 @@
-name = Content type export
+name = Content Type Exporter
+description = "Export content types as field and instance creation code for insertion in a custom module."
+core = 7.x
+package = Development
+
+files[] = content_type_export.module
+files[] = content_type_export.install

@@ -1,0 +1,283 @@
+<?php
+/**
+ * @file
+ * Module that provides an export feature for Content Types built with the UI.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function content_type_export_menu () {
+  $items = array();
+  $items['admin/structure/types/manage/%node_type/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'content_type_export_task',
+    'page arguments' => array(4),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+  );
+
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'taxonomy_vocabulary_export_task',
+    'page arguments' => array(3),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+  );
+
+  return $items;
+}
+
+/**
+ * Attempts to output PHP code which can re-create a vocabulary for use in a module.
+ */
+function taxonomy_vocabulary_export_task($vocabulary) {
+  $content = array();
+  $content['bundle_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Content type',
+    '#value' => content_type_export_dump_taxonomy_vocabulary_as_code($vocabulary),
+    '#resizable' => true,
+  );
+  $content['fields_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Fields',
+    '#value' => content_type_export_dump_fields_as_code($vocabulary->machine_name, 'taxonomy_term'),
+    '#resizable' => true,
+  );
+  $content['instances_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Instances',
+    '#value' => content_type_export_dump_instances_as_code($vocabulary->machine_name, 'taxonomy_term'),
+    '#resizable' => true,
+  );
+  return $content;
+}
+
+/**
+ * Attempts to output PHP code which can re-create a content type for use in a module.
+ */
+function content_type_export_task($bundle) {
+  $content = array();
+  $content['bundle_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Content type',
+    '#value' => content_type_export_dump_bundle_as_code($bundle),
+    '#resizable' => true,
+  );
+  $content['fields_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Fields',
+    '#value' => content_type_export_dump_fields_as_code($bundle->type),
+    '#resizable' => true,
+  );
+  $content['instances_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Instances',
+    '#value' => content_type_export_dump_instances_as_code($bundle->type),
+    '#resizable' => true,
+  );
+  return $content;
+}
+
+/**
+ * Export the basic properties needed to create a new taxonomy vocabulary in a module.
+ */
+function content_type_export_dump_taxonomy_vocabulary_as_code($vocabulary) {
+  $export = "\$vocabulary = (object) array(
+    'name' => '{$vocabulary->name}',
+    'description' => '{$vocabulary->description}',
+    'machine_name' => '{$vocabulary->machine_name}',
+  );
+  if(!taxonomy_vocabulary_machine_name_load(\$vocabulary->machine_name)) {
+    taxonomy_vocabulary_save(\$vocabulary);
+  }";
+  return $export;
+}
+
+/**
+ * Export the basic properties needed to create a new content type in a module.
+ */
+function content_type_export_dump_bundle_as_code($bundle) {
+  // Convert to an array for easy editing
+  $bundle = (array)$bundle;
+  $export = '';
+
+  // Unset default properties
+  unset($bundle['module']);
+  unset($bundle['help']);
+  unset($bundle['has_title']);
+  unset($bundle['title_label']);
+  unset($bundle['disabled']);
+  unset($bundle['modified']);
+  unset($bundle['orig_type']);
+  unset($bundle['disabled_changed']);
+  unset($bundle['locked']);
+
+  // Output PHP code to create the bundle
+  $bundle_export = '$bundle = '. _var_export_reformat($bundle) .';';
+  $export .=<<<RAW
+// {$bundle['name']} content type
+$bundle_export
+
+\$bundle = node_type_set_defaults(\$bundle);
+node_type_save(\$bundle);
+node_add_body_field(\$bundle);
+
+RAW;
+
+  return $export;
+}
+
+/**
+ * Export the field definitions and dependencies needed to re-create all the fields for a content type
+ */
+function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'node') {
+  $all_fields = field_info_fields();
+
+  $export = '';
+
+  // Go through all the fields in this Drupal instance
+  foreach ($all_fields as $field_name => $field_details) {
+    if ($field_name == 'body') {
+      continue;
+    }
+
+    // If the current field is attached to the current bundle, we'll need to export it
+    if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
+      // If a taxonomy field the taxonomy may need to be created
+      if ($field_details['type'] == 'taxonomy_term_reference') {
+        $taxonomy = (array) taxonomy_vocabulary_machine_name_load($field_details['settings']['allowed_values'][0]['vocabulary']);
+        unset($taxonomy['vid']);
+        unset($taxonomy['hierarchy']);
+        unset($taxonomy['weight']);
+        unset($taxonomy['rdf_mapping']);
+
+        $taxonomy_export = '$vocabulary = (object) '. _var_export_reformat($taxonomy) .';';
+        $export .=<<<RAW
+// {$taxonomy['machine_name']} taxonomy
+$taxonomy_export
+if (taxonomy_vocabulary_machine_name_load(\$vocabulary->machine_name) === FALSE) {
+  taxonomy_vocabulary_save(\$vocabulary);
+}
+
+
+RAW;
+
+      }
+
+      // Unset unnecessary properties
+      $field = $all_fields[$field_name];
+      unset($field['translatable']);
+      unset($field['entity_types']);
+      unset($field['bundles']);
+      unset($field['id']);
+      unset($field['deleted']);
+      unset($field['module']);
+      unset($field['active']);
+      unset($field['locked']);
+      unset($field['columns']);
+      unset($field['indexes']);
+      unset($field['foreign keys']);
+      unset($field['storage']);
+
+      // Export the field as code
+      $field_export = '$field = '. _var_export_reformat($field) .';';
+      $export .=<<<RAW
+// $field_name field
+$field_export
+if (field_info_field(\$field['field_name']) === NULL) {
+  field_create_field(\$field);
+}
+
+
+RAW;
+
+
+      // Field collections!
+      // If the current field is the name of a bundle also, then we need to
+      // export fields in that bundle as well!
+      $field_is_collection = FALSE;
+      foreach ($all_fields as $other_field_name => $other_field_details) {
+        if ($field_name === $other_field_name)
+          continue;
+
+        if (!empty($other_field_details['bundles']['field_collection_item']) && in_array($field_name, $other_field_details['bundles']['field_collection_item'])) {
+          $field_is_collection = TRUE;
+        }
+      }
+      if ($field_is_collection) {
+        $export .= content_type_export_dump_fields_as_code($field_name, 'field_collection_item');
+      }
+
+    }
+  }
+
+  return $export;
+}
+
+/**
+ * Attach specific instances of defined fields to the content type being exported
+ */
+function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node') {
+  $all_fields = field_info_fields();
+  $export = '';
+
+  // Go through all the fields in this Drupal instance
+  foreach ($all_fields as $field_name => $field_details) {
+    if ($field_name == 'body')
+      continue;
+
+    // If the current field is attached to the current bundle, we'll need to export it
+    if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
+      // Unset unnecessary properties
+      $instance = field_read_instance($entity_type, $field_name, $bundle_name);
+      unset($instance['id']);
+      unset($instance['field_id']);
+
+      // Export the instance as code
+      $instance_export =  '$instance = '. _var_export_reformat($instance) .';';
+      $export .=<<<RAW
+// $field_name instance
+$instance_export
+field_create_instance(\$instance);
+
+
+RAW;
+
+      // Field collections!
+      // If the current field is the name of a bundle also, then we need to
+      // export fields in that bundle as well!
+      $field_is_collection = FALSE;
+      foreach ($all_fields as $other_field_name => $other_field_details) {
+        if ($field_name === $other_field_name)
+          continue;
+
+        if (!empty($other_field_details['bundles']['field_collection_item']) && in_array($field_name, $other_field_details['bundles']['field_collection_item'])) {
+          $field_is_collection = TRUE;
+        }
+      }
+      if ($field_is_collection) {
+        $export .= content_type_export_dump_instances_as_code($field_name, 'field_collection_item');
+      }
+    }
+  }
+
+  return $export;
+}
+
+/**
+ * Dump the variable to PHP code and then perform some basic reformatting
+ */
+function _var_export_reformat($var) {
+  // Dump the variable and store the dump output for processing
+  $export = var_export($var, true);
+
+  // Minor formatting changes for style
+  $export = str_replace("array (", "array(", $export);
+  $export = preg_replace("/\=\>[ \n\t]+array\(/", '=> array(', $export);
+
+  return $export;
+}
