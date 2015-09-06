@@ -27,7 +27,55 @@ function content_type_export_menu () {
     'weight' => 100,
   );
 
+  $items['admin/structure/types/manage/%node_type/fields/%field_ui_menu/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'content_type_export_field',
+    'page arguments' => array(4, 6),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+  );
+
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/fields/%field_ui_menu/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'content_type_export_field',
+    'page arguments' => array(3, 5),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+  );
+
   return $items;
+}
+
+/**
+ * Export field definition and instance definition for a specific field
+ */
+function content_type_export_field($bundle, $field) {
+
+  $all_fields = field_info_fields();
+  $single_field[$field['field_name']] = $all_fields[$field['field_name']];
+
+  drupal_set_title('Export ' . $field['label']);
+
+  $bundle_name = isset($bundle->vid) ? $bundle->machine_name : $bundle->type;
+  $entity_type = isset($bundle->vid) ? 'taxonomy_term' : 'node';
+
+  $content['fields_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Field',
+    '#value' => content_type_export_dump_fields_as_code($bundle_name, $entity_type, $single_field),
+    '#resizable' => true,
+  );
+  $content['instances_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Instance for ' . $entity_type . ' ' . $bundle_name,
+    '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field),
+    '#resizable' => true,
+  );
+
+  return $content;
+
 }
 
 /**
@@ -134,14 +182,15 @@ RAW;
 /**
  * Export the field definitions and dependencies needed to re-create all the fields for a content type
  */
-function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'node') {
-  $all_fields = field_info_fields();
+function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'node', $fields = NULL) {
+
+  $all_fields = is_null($fields) ? field_info_fields() : $fields;
 
   $export = '';
 
   // Go through all the fields in this Drupal instance
   foreach ($all_fields as $field_name => $field_details) {
-    if ($field_name == 'body') {
+    if ($field_name == 'body' && is_null($fields)) {
       continue;
     }
 
@@ -221,13 +270,15 @@ RAW;
 /**
  * Attach specific instances of defined fields to the content type being exported
  */
-function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node') {
-  $all_fields = field_info_fields();
+function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node', $fields = NULL) {
+
+  $all_fields = is_null($fields) ? field_info_fields() : $fields;
+
   $export = '';
 
   // Go through all the fields in this Drupal instance
   foreach ($all_fields as $field_name => $field_details) {
-    if ($field_name == 'body')
+    if ($field_name == 'body' && is_null($fields))
       continue;
 
     // If the current field is attached to the current bundle, we'll need to export it
