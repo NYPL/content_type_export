@@ -11,11 +11,13 @@ function content_type_export_menu () {
   $items = array();
   $items['admin/structure/types/manage/%node_type/export'] = array(
     'title' => 'Export',
-    'page callback' => 'content_type_export_task',
+    'page callback' => 'content_type_export_node_task',
     'page arguments' => array(4),
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 100,
+    'file' => 'content_type_export.node.inc',
+    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
   );
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/export'] = array(
@@ -25,6 +27,8 @@ function content_type_export_menu () {
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 100,
+    'file' => 'content_type_export.taxonomy.inc',
+    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
   );
 
   $items['admin/structure/types/manage/%node_type/fields/%field_ui_menu/export'] = array(
@@ -43,6 +47,19 @@ function content_type_export_menu () {
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 100,
+    'file' => 'content_type_export.taxonomy.inc',
+    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
+  );
+
+  $items['admin/structure/entityform_types/manage/%entity_object/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'entityform_type_export',
+    'page arguments' => array(4),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+    'file' => 'content_type_export.entityform.inc',
+    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
   );
 
   return $items;
@@ -76,107 +93,6 @@ function content_type_export_field($bundle, $field) {
 
   return $content;
 
-}
-
-/**
- * Attempts to output PHP code which can re-create a vocabulary for use in a module.
- */
-function taxonomy_vocabulary_export_task($vocabulary) {
-  $content = array();
-  $content['bundle_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Content type',
-    '#value' => content_type_export_dump_taxonomy_vocabulary_as_code($vocabulary),
-    '#resizable' => true,
-  );
-  $content['fields_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Fields',
-    '#value' => content_type_export_dump_fields_as_code($vocabulary->machine_name, 'taxonomy_term'),
-    '#resizable' => true,
-  );
-  $content['instances_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Instances',
-    '#value' => content_type_export_dump_instances_as_code($vocabulary->machine_name, 'taxonomy_term'),
-    '#resizable' => true,
-  );
-  return $content;
-}
-
-/**
- * Attempts to output PHP code which can re-create a content type for use in a module.
- */
-function content_type_export_task($bundle) {
-  $content = array();
-  $content['bundle_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Content type',
-    '#value' => content_type_export_dump_bundle_as_code($bundle),
-    '#resizable' => true,
-  );
-  $content['fields_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Fields',
-    '#value' => content_type_export_dump_fields_as_code($bundle->type),
-    '#resizable' => true,
-  );
-  $content['instances_export'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Instances',
-    '#value' => content_type_export_dump_instances_as_code($bundle->type),
-    '#resizable' => true,
-  );
-  return $content;
-}
-
-/**
- * Export the basic properties needed to create a new taxonomy vocabulary in a module.
- */
-function content_type_export_dump_taxonomy_vocabulary_as_code($vocabulary) {
-  $export = "\$vocabulary = (object) array(
-    'name' => '{$vocabulary->name}',
-    'description' => '{$vocabulary->description}',
-    'machine_name' => '{$vocabulary->machine_name}',
-  );
-  if(!taxonomy_vocabulary_machine_name_load(\$vocabulary->machine_name)) {
-    taxonomy_vocabulary_save(\$vocabulary);
-  }";
-  return $export;
-}
-
-/**
- * Export the basic properties needed to create a new content type in a module.
- */
-function content_type_export_dump_bundle_as_code($bundle) {
-  // Convert to an array for easy editing
-  $bundle = (array)$bundle;
-  $export = '';
-
-  // Unset default properties
-  unset($bundle['module']);
-  unset($bundle['help']);
-  unset($bundle['has_title']);
-  unset($bundle['title_label']);
-  unset($bundle['disabled']);
-  unset($bundle['modified']);
-  unset($bundle['orig_type']);
-  unset($bundle['disabled_changed']);
-  unset($bundle['locked']);
-
-  // Output PHP code to create the bundle
-  $bundle_export = '$bundle = '. _var_export_reformat($bundle) .';';
-  $export .=<<<RAW
-// {$bundle['name']} content type
-$bundle_export
-
-\$bundle = node_type_set_defaults(\$bundle);
-node_type_save(\$bundle);
-node_add_body_field(\$bundle);
-
-RAW;
-
-  return $export;
 }
 
 /**
@@ -293,7 +209,9 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
       $export .=<<<RAW
 // $field_name instance
 $instance_export
-field_create_instance(\$instance);
+if (field_info_instance('$entity_type', '$field_name', '$bundle_name') === NULL) {
+  field_create_instance(\$instance);
+}
 
 
 RAW;
@@ -329,6 +247,45 @@ function _var_export_reformat($var) {
   // Minor formatting changes for style
   $export = str_replace("array (", "array(", $export);
   $export = preg_replace("/\=\>[ \n\t]+array\(/", '=> array(', $export);
+
+  return $export;
+}
+
+/**
+ * Generate the whole .install file
+ */
+function content_type_export_install_file($content) {
+  $type = $content['bundle_export']['#value'];
+  $fields = $content['fields_export']['#value'];
+  $instances = $content['instances_export']['#value'];
+  $unstinall = $content['uninstall']['#value'];
+
+  $export = <<<PHP
+<?php
+
+function MY_MODULE_install() {
+  MY_MODULE_create_type();
+  MY_MODULE_create_fields();
+  MY_MODULE_create_instances();
+}
+
+function MY_MODULE_uninstall() {
+$unstinall
+}
+
+function MY_MODULE_create_type() {
+  $type
+}
+
+function MY_MODULE_create_fields() {
+$fields
+}
+
+function MY_MODULE_create_instances() {
+$instances
+}
+
+PHP;
 
   return $export;
 }
