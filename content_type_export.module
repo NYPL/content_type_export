@@ -280,21 +280,21 @@ $unstinall
 }
 
 /**
- * Create MY_MODULE content type.
+ * Set up the content type.
  */
 function MY_MODULE_create_type() {
   $type
 }
 
 /**
- * Create MY_MODULE fields.
+ * Create the fields
  */
 function MY_MODULE_create_fields() {
 $fields
 }
 
 /**
- * Create MY_MODULE field instances.
+ * Create the field instances
  */
 function MY_MODULE_create_instances() {
 $instances
