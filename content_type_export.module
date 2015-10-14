@@ -263,24 +263,39 @@ function content_type_export_install_file($content) {
   $export = <<<PHP
 <?php
 
+/**
+ * Implements hook_install().
+ */
 function MY_MODULE_install() {
   MY_MODULE_create_type();
   MY_MODULE_create_fields();
   MY_MODULE_create_instances();
 }
 
+/**
+ * Implements hook_uninstall().
+ */
 function MY_MODULE_uninstall() {
 $unstinall
 }
 
+/**
+ * Create MY_MODULE content type.
+ */
 function MY_MODULE_create_type() {
   $type
 }
 
+/**
+ * Create MY_MODULE fields.
+ */
 function MY_MODULE_create_fields() {
 $fields
 }
 
+/**
+ * Create MY_MODULE field instances.
+ */
 function MY_MODULE_create_instances() {
 $instances
 }
