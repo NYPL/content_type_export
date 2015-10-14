@@ -77,7 +77,7 @@ function content_type_export_entity_form_uninstall_code($type) {
   foreach(\$fields as \$field) {
     field_delete_instance(\$field);
   }
-  \$type = entityform_empty_load('$type');
+  \$type = entityform_type_load('$type');
   entityform_type_delete(\$type);
 PHP;
 
