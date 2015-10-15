@@ -1,0 +1,6 @@
+name = Node to code
+description = Export a node as PHP code that could be run to recreate the node.
+core = 7.x
+package = Development
+
+dependencies[] = content_type_export
