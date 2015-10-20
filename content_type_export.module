@@ -90,6 +90,12 @@ function content_type_export_field($bundle, $field) {
     '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field),
     '#resizable' => true,
   );
+  $content['instances_update_export'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Code to update instance for ' . $entity_type . ' ' . $bundle_name,
+    '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field, TRUE),
+    '#resizable' => true,
+  );
 
   return $content;
 
@@ -186,7 +192,7 @@ RAW;
 /**
  * Attach specific instances of defined fields to the content type being exported
  */
-function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node', $fields = NULL) {
+function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node', $fields = NULL, $update = FALSE) {
 
   $all_fields = is_null($fields) ? field_info_fields() : $fields;
 
@@ -206,15 +212,24 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
 
       // Export the instance as code
       $instance_export =  '$instance = '. _var_export_reformat($instance) .';';
-      $export .=<<<RAW
+      if($update) {
+        $export .=<<<RAW
+// $field_name instance
+$instance_export
+field_update_instance(\$instance);
+
+RAW;
+      } else {
+        $export .=<<<RAW
 // $field_name instance
 $instance_export
 if (field_info_instance('$entity_type', '$field_name', '$bundle_name') === NULL) {
   field_create_instance(\$instance);
 }
 
-
 RAW;
+      }
+
 
       // Field collections!
       // If the current field is the name of a bundle also, then we need to
