@@ -1,0 +1,6 @@
+name = Image style to code
+description = Export an image style to code to paste into a module install or update functions
+core = 7.x
+package = Development
+
+dependencies[] = content_type_export
