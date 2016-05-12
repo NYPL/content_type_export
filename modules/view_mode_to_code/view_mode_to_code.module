@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function view_mode_to_code_menu() {
+  $items = array();
+  $items['admin/structure/types/manage/%node_type/display/%/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'view_mode_to_code_export',
+    'page arguments' => array(4, 6),
+    'access arguments' => array('administer content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for field_ui_display_overview_form
+ */
+function view_mode_to_code_form_field_ui_display_overview_form_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['export'] = array(
+    '#type' => 'submit',
+    '#value' => 'Export',
+  );
+  $form['#submit'][] = 'view_mode_to_code_field_ui_display_overview_form_submit';
+}
+
+function view_mode_to_code_field_ui_display_overview_form_submit($form, &$form_state) {
+  if($form_state['triggering_element']['#value'] == 'Export') {
+    $bundle = $form_state['field_group_params']->bundle;
+    $view_mode = $form_state['field_group_params']->mode;
+    $form_state['redirect'] = "admin/structure/types/manage/{$bundle}/display/{$view_mode}/export";
+  }
+}
+
+function view_mode_to_code_export($bundle, $view_mode) {
+  $build = array();
+
+  $bundle_name = $bundle->type;
+  $entity_type = 'node';
+
+  $all_fields = field_info_fields();
+
+  $export = <<<RAW
+// Set up variables
+\$entity_type = '$entity_type';
+\$bundle_name = '$bundle_name';
+
+
+RAW;
+
+  foreach ($all_fields as $field_name => $field_details) {
+
+    // If the current field is attached to the current bundle, we'll need to export it
+    if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
+
+      $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+      $instance_view_mode_export =  _var_export_reformat($instance['display'][$view_mode]);
+
+      $export .=<<<RAW
+// $field_name
+\$instance = field_info_instance(\$entity_type, '$field_name', \$bundle_name);
+\$instance['display']['$view_mode'] = $instance_view_mode_export;
+field_update_instance(\$instance);
+
+
+RAW;
+
+    }
+  }
+
+  $build['back']['#markup'] = l('<< ' . t('Back to edit view mode'), "admin/structure/types/manage/$bundle_name/display/$view_mode");
+
+  $build['instances_export'] = array(
+    '#type' => 'textarea',
+    '#title' => "Update field instance definitions",
+    '#value' => $export,
+    '#resizable' => true,
+  );
+
+  return $build;
+
+}
