@@ -40,6 +40,22 @@ function content_type_export_menu () {
     'weight' => 100,
   );
 
+  if(function_exists('commerce_customer_profile_types')) {
+    foreach (commerce_customer_profile_types() as $type => $profile_type) {
+      // Convert underscores to hyphens for the menu item argument.
+      $type_arg = strtr($type, '_', '-');
+
+      $items['admin/commerce/customer-profiles/types/' . $type_arg . '/fields/%/export'] = array(
+        'title' => 'Export',
+        'page callback' => 'content_type_export_profile_field',
+        'page arguments' => array(4, 6),
+        'access arguments' => array('administer content'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 100,
+      );
+    }
+  }
+
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/fields/%field_ui_menu/export'] = array(
     'title' => 'Export',
     'page callback' => 'content_type_export_field',
@@ -65,6 +81,12 @@ function content_type_export_menu () {
   return $items;
 }
 
+function content_type_export_profile_field($profile_type, $field_name) {
+  $bundle = (object) ['type' => $profile_type, 'entity_type' => 'commerce_customer_profile'];
+  $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type);
+  return content_type_export_field($bundle, $instance);
+}
+
 /**
  * Export field definition and instance definition for a specific field
  */
@@ -76,7 +98,12 @@ function content_type_export_field($bundle, $field) {
   drupal_set_title('Export ' . $field['label']);
 
   $bundle_name = isset($bundle->vid) ? $bundle->machine_name : $bundle->type;
-  $entity_type = isset($bundle->vid) ? 'taxonomy_term' : 'node';
+
+  if(!empty($bundle->entity_type)) {
+    $entity_type = $bundle->entity_type;
+  } else {
+    $entity_type = isset($bundle->vid) ? 'taxonomy_term' : 'node';
+  }
 
   $content['fields_export'] = array(
     '#type' => 'textarea',
