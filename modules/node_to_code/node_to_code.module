@@ -20,21 +20,24 @@ function node_to_code_menu () {
   return $items;
 }
 
+/**
+ * Generate code required to programmatically recreate the node passed in.
+ */
 function node_to_code_export($node) {
 
-  drupal_set_message('This module has next to no testing. Bug fixes may be needed. Test the code below before assuming it works.', 'warning');
+  drupal_set_message(t('This module has next to no testing. Bug fixes may be needed. Test the code below before assuming it works.'), 'warning');
 
   $export = '$node = new stdClass();' . PHP_EOL;
 
   $child_entities_export = '';
 
   $ignore = array('nid', 'vid', 'vuuid', 'uuid', 'data');
-  foreach($node as $k => $v) {
-    if(in_array($k, $ignore)) {
+  foreach ($node as $k => $v) {
+    if (in_array($k, $ignore)) {
       continue;
     }
 
-    if(is_array($v)) {
+    if (is_array($v)) {
 
       $field =& $v;
       $field_name =& $k;
@@ -42,13 +45,13 @@ function node_to_code_export($node) {
 
       $add_field_to_node = TRUE;
 
-      if($field_info !== NULL) {
+      if ($field_info !== NULL) {
 
-        if($field_info['type'] == 'paragraphs') {
+        if ($field_info['type'] == 'paragraphs') {
           $add_field_to_node = FALSE;
 
-          foreach($field as $lang => $items) {
-            foreach($items as $item) {
+          foreach ($field as $lang => $items) {
+            foreach ($items as $item) {
               $paragraph = paragraphs_item_load($item['value']);
 
               $child_entities_export .= PHP_EOL . "\$paragraph = new ParagraphsItemEntity(array(
@@ -59,10 +62,10 @@ function node_to_code_export($node) {
 \$paragraph->setHostEntity('node', \$node);
 ";
 
-              foreach($paragraph as $pk => $pv) {
+              foreach ($paragraph as $pk => $pv) {
 
-                if(is_array($pv)) {
-                  $pexported = _var_export_reformat($pv);
+                if (is_array($pv)) {
+                  $pexported = content_type_export_var_export_reformat($pv);
                   $child_entities_export .= '$paragraph->' . $pk . ' = ' . $pexported . ';' . PHP_EOL;
                 }
 
@@ -77,8 +80,8 @@ function node_to_code_export($node) {
 
       }
 
-      if($add_field_to_node) {
-        $exported = _var_export_reformat($v);
+      if ($add_field_to_node) {
+        $exported = content_type_export_var_export_reformat($v);
         $export .= '$node->' . $k . ' = ' . $exported . ';' . PHP_EOL;
       }
 
@@ -98,7 +101,7 @@ function node_to_code_export($node) {
     '#type' => 'textarea',
     '#title' => 'Node creation script',
     '#value' => $export,
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
 
   return $content;

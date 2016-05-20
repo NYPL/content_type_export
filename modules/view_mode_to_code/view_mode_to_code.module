@@ -17,7 +17,7 @@ function view_mode_to_code_menu() {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for field_ui_display_overview_form
+ * Implements hook_form_FORM_ID_alter() for field_ui_display_overview_form.
  */
 function view_mode_to_code_form_field_ui_display_overview_form_alter(&$form, &$form_state, $form_id) {
   $form['actions']['export'] = array(
@@ -27,14 +27,22 @@ function view_mode_to_code_form_field_ui_display_overview_form_alter(&$form, &$f
   $form['#submit'][] = 'view_mode_to_code_field_ui_display_overview_form_submit';
 }
 
+/**
+ * Submit callback for field_ui_display_overview_form to redirect users to the
+ * export page.
+ */
 function view_mode_to_code_field_ui_display_overview_form_submit($form, &$form_state) {
-  if($form_state['triggering_element']['#value'] == 'Export') {
+  if ($form_state['triggering_element']['#value'] == 'Export') {
     $bundle = $form_state['field_group_params']->bundle;
     $view_mode = $form_state['field_group_params']->mode;
     $form_state['redirect'] = "admin/structure/types/manage/{$bundle}/display/{$view_mode}/export";
   }
 }
 
+/**
+ * Generate code required to programmatically update this all field instances
+ * in this view mode.
+ */
 function view_mode_to_code_export($bundle, $view_mode) {
   $build = array();
 
@@ -58,7 +66,7 @@ RAW;
 
       $instance = field_info_instance($entity_type, $field_name, $bundle_name);
 
-      $instance_view_mode_export =  _var_export_reformat($instance['display'][$view_mode]);
+      $instance_view_mode_export =  content_type_export_var_export_reformat($instance['display'][$view_mode]);
 
       $export .=<<<RAW
 // $field_name
@@ -75,17 +83,17 @@ RAW;
   $build['back']['#markup'] = l('<< ' . t('Back to edit view mode'), "admin/structure/types/manage/$bundle_name/display/$view_mode");
 
   // Field groups
-  if(module_exists('field_group')) {
+  if (module_exists('field_group')) {
     $groups = field_group_read_groups(array(
       'entity_type' => $entity_type,
       'bundle'      => $bundle_name,
       'mode'   => $view_mode,
-    ), false);
+    ), FALSE);
 
     $groups = $groups[$entity_type][$bundle_name][$view_mode];
 
-    foreach($groups as $group_name => $group) {
-      $group_export =  _var_export_reformat((array) $group);
+    foreach ($groups as $group_name => $group) {
+      $group_export =  content_type_export_var_export_reformat((array) $group);
 
       $export .=<<<RAW
 // group $group_name
@@ -106,7 +114,7 @@ RAW;
     '#type' => 'textarea',
     '#title' => "Update field instance definitions",
     '#value' => $export,
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
 
   return $build;

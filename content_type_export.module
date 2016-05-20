@@ -22,7 +22,7 @@ function content_type_export_menu () {
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/export'] = array(
     'title' => 'Export',
-    'page callback' => 'taxonomy_vocabulary_export_task',
+    'page callback' => 'content_type_export_taxonomy_vocabulary',
     'page arguments' => array(3),
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
@@ -40,7 +40,7 @@ function content_type_export_menu () {
     'weight' => 100,
   );
 
-  if(function_exists('commerce_customer_profile_types')) {
+  if (function_exists('commerce_customer_profile_types')) {
     foreach (commerce_customer_profile_types() as $type => $profile_type) {
       // Convert underscores to hyphens for the menu item argument.
       $type_arg = strtr($type, '_', '-');
@@ -69,7 +69,7 @@ function content_type_export_menu () {
 
   $items['admin/structure/entityform_types/manage/%entity_object/export'] = array(
     'title' => 'Export',
-    'page callback' => 'entityform_type_export',
+    'page callback' => 'content_type_export_entityform',
     'page arguments' => array(4),
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
@@ -99,7 +99,7 @@ function content_type_export_field($bundle, $field) {
 
   $bundle_name = isset($bundle->vid) ? $bundle->machine_name : $bundle->type;
 
-  if(!empty($bundle->entity_type)) {
+  if (!empty($bundle->entity_type)) {
     $entity_type = $bundle->entity_type;
   } else {
     $entity_type = isset($bundle->vid) ? 'taxonomy_term' : 'node';
@@ -109,19 +109,19 @@ function content_type_export_field($bundle, $field) {
     '#type' => 'textarea',
     '#title' => 'Field',
     '#value' => content_type_export_dump_fields_as_code($bundle_name, $entity_type, $single_field),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['instances_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Instance for ' . $entity_type . ' ' . $bundle_name,
     '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['instances_update_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Code to update instance for ' . $entity_type . ' ' . $bundle_name,
     '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field, TRUE),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
 
   return $content;
@@ -153,7 +153,7 @@ function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'n
         unset($taxonomy['weight']);
         unset($taxonomy['rdf_mapping']);
 
-        $taxonomy_export = '$vocabulary = (object) '. _var_export_reformat($taxonomy) .';';
+        $taxonomy_export = '$vocabulary = (object) '. content_type_export_var_export_reformat($taxonomy) .';';
         $export .=<<<RAW
 // {$taxonomy['machine_name']} taxonomy
 $taxonomy_export
@@ -182,7 +182,7 @@ RAW;
       unset($field['storage']);
 
       // Export the field as code
-      $field_export = '$field = '. _var_export_reformat($field) .';';
+      $field_export = '$field = '. content_type_export_var_export_reformat($field) .';';
       $export .=<<<RAW
 // $field_name field
 $field_export
@@ -238,8 +238,8 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
       unset($instance['field_id']);
 
       // Export the instance as code
-      $instance_export =  '$instance = '. _var_export_reformat($instance) .';';
-      if($update) {
+      $instance_export =  '$instance = '. content_type_export_var_export_reformat($instance) .';';
+      if ($update) {
         $export .=<<<RAW
 // $field_name instance
 $instance_export
@@ -282,9 +282,9 @@ RAW;
 /**
  * Dump the variable to PHP code and then perform some basic reformatting
  */
-function _var_export_reformat($var) {
+function content_type_export_var_export_reformat($var) {
   // Dump the variable and store the dump output for processing
-  $export = var_export($var, true);
+  $export = var_export($var, TRUE);
 
   // Minor formatting changes for style
   $export = str_replace("array (", "array(", $export);

@@ -1,7 +1,12 @@
 <?php
+/**
+ * @file
+ * Functionality to export node bundles and attached fields to code.
+ */
 
 /**
- * Attempts to output PHP code which can re-create a content type for use in a module.
+ * Attempts to output PHP code which can re-create a content type for use in a
+ * module.
  */
 function content_type_export_node_task($bundle) {
   $content = array();
@@ -9,31 +14,31 @@ function content_type_export_node_task($bundle) {
     '#type' => 'textarea',
     '#title' => 'Content type',
     '#value' => content_type_export_dump_bundle_as_code($bundle),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['fields_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Fields',
     '#value' => content_type_export_dump_fields_as_code($bundle->type),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['instances_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Instances',
     '#value' => content_type_export_dump_instances_as_code($bundle->type),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['uninstall'] = array(
     '#type' => 'textarea',
     '#title' => 'Uninstall code',
     '#value' => content_type_export_node_uninstall_code($bundle->type),
-    '#resizable' => true,
+    '#resizable' => TRUE,
   );
   $content['whole_install_file'] = array(
     '#type' => 'textarea',
     '#title' => 'The whole module.install',
     '#value' => content_type_export_install_file($content),
-    '#resizable' => true,
+    '#resizable' => TRUE,
     '#attributes' => array(
       'style' => 'height: 500px'
     ),
@@ -61,7 +66,7 @@ function content_type_export_dump_bundle_as_code($bundle) {
   unset($bundle['locked']);
 
   // Output PHP code to create the bundle
-  $bundle_export = '$bundle = '. _var_export_reformat($bundle) .';';
+  $bundle_export = '$bundle = '. content_type_export_var_export_reformat($bundle) .';';
   $export .=<<<RAW
 // {$bundle['name']} content type
 $bundle_export
@@ -76,7 +81,7 @@ RAW;
 }
 
 /**
- * Generate code for the uninstall hook
+ * Generate code for the uninstall hook.
  */
 function content_type_export_node_uninstall_code($bundle) {
   $entity_type = 'node';
