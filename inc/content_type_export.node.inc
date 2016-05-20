@@ -50,7 +50,7 @@ function content_type_export_node_task($bundle) {
  */
 function content_type_export_dump_bundle_as_code($bundle) {
   // Convert to an array for easy editing.
-  $bundle = (array)$bundle;
+  $bundle = (array) $bundle;
   $export = '';
 
   // Unset default properties.
@@ -65,7 +65,7 @@ function content_type_export_dump_bundle_as_code($bundle) {
   unset($bundle['locked']);
 
   // Output PHP code to create the bundle.
-  $bundle_export = '$bundle = '. content_type_export_var_export_reformat($bundle) . ';';
+  $bundle_export = '$bundle = ' . content_type_export_var_export_reformat($bundle) . ';';
   $export .= <<<RAW
 // {$bundle['name']} content type
 $bundle_export

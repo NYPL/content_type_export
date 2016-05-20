@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Module that provides an export feature for view modes.
+ */
 
 /**
  * Implements hook_menu().
@@ -17,7 +21,7 @@ function view_mode_to_code_menu() {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for field_ui_display_overview_form.
+ * Implements hook_form_FORM_ID_alter() for field_ui_display_overview_form().
  */
 function view_mode_to_code_form_field_ui_display_overview_form_alter(&$form, &$form_state, $form_id) {
   $form['actions']['export'] = array(
@@ -28,8 +32,7 @@ function view_mode_to_code_form_field_ui_display_overview_form_alter(&$form, &$f
 }
 
 /**
- * Submit callback for field_ui_display_overview_form to redirect users to the
- * export page.
+ * Submit callback for field_ui_display_overview_form to redirect users.
  */
 function view_mode_to_code_field_ui_display_overview_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#value'] == 'Export') {
@@ -40,8 +43,7 @@ function view_mode_to_code_field_ui_display_overview_form_submit($form, &$form_s
 }
 
 /**
- * Generate code required to programmatically update this all field instances
- * in this view mode.
+ * Generate code required to programmatically update this all field instances.
  */
 function view_mode_to_code_export($bundle, $view_mode) {
   $build = array();
@@ -66,9 +68,9 @@ RAW;
 
       $instance = field_info_instance($entity_type, $field_name, $bundle_name);
 
-      $instance_view_mode_export =  content_type_export_var_export_reformat($instance['display'][$view_mode]);
+      $instance_view_mode_export = content_type_export_var_export_reformat($instance['display'][$view_mode]);
 
-      $export .=<<<RAW
+      $export .= <<<RAW
 // $field_name
 \$instance = field_info_instance(\$entity_type, '$field_name', \$bundle_name);
 \$instance['display']['$view_mode'] = $instance_view_mode_export;
@@ -82,7 +84,7 @@ RAW;
 
   $build['back']['#markup'] = l('<< ' . t('Back to edit view mode'), "admin/structure/types/manage/$bundle_name/display/$view_mode");
 
-  // Field groups
+  // Field groups.
   if (module_exists('field_group')) {
     $groups = field_group_read_groups(array(
       'entity_type' => $entity_type,
@@ -93,9 +95,9 @@ RAW;
     $groups = $groups[$entity_type][$bundle_name][$view_mode];
 
     foreach ($groups as $group_name => $group) {
-      $group_export =  content_type_export_var_export_reformat((array) $group);
+      $group_export = content_type_export_var_export_reformat((array) $group);
 
-      $export .=<<<RAW
+      $export .= <<<RAW
 // group $group_name
 \$group = (object) $group_export;
 field_group_group_save(\$group);
@@ -106,9 +108,7 @@ ctools_export_crud_enable('field_group', \$group->identifier);
 RAW;
     }
 
-
   }
-
 
   $build['instances_export'] = array(
     '#type' => 'textarea',

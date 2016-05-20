@@ -82,7 +82,7 @@ function content_type_export_menu() {
 }
 
 /**
- * Export fields for a commerce customer profile type
+ * Export fields for a commerce customer profile type.
  */
 function content_type_export_profile_field($profile_type, $field_name) {
   $bundle = (object) ['type' => $profile_type, 'entity_type' => 'commerce_customer_profile'];
@@ -91,7 +91,7 @@ function content_type_export_profile_field($profile_type, $field_name) {
 }
 
 /**
- * Export field definition and instance definition for a specific field
+ * Export field definition and instance definition for a specific field.
  */
 function content_type_export_field($bundle, $field) {
 
@@ -104,7 +104,8 @@ function content_type_export_field($bundle, $field) {
 
   if (!empty($bundle->entity_type)) {
     $entity_type = $bundle->entity_type;
-  } else {
+  }
+  else {
     $entity_type = isset($bundle->vid) ? 'taxonomy_term' : 'node';
   }
 
@@ -148,7 +149,7 @@ function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'n
 
     // If the current field is attached to the current bundle export it.
     if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
-      // If a taxonomy field the taxonomy may need to be created
+      // If a taxonomy field the taxonomy may need to be created.
       if ($field_details['type'] == 'taxonomy_term_reference') {
         $taxonomy = (array) taxonomy_vocabulary_machine_name_load($field_details['settings']['allowed_values'][0]['vocabulary']);
         unset($taxonomy['vid']);
@@ -156,7 +157,7 @@ function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'n
         unset($taxonomy['weight']);
         unset($taxonomy['rdf_mapping']);
 
-        $taxonomy_export = '$vocabulary = (object) '. content_type_export_var_export_reformat($taxonomy) . ';';
+        $taxonomy_export = '$vocabulary = (object) ' . content_type_export_var_export_reformat($taxonomy) . ';';
         $export .= <<<RAW
 // {$taxonomy['machine_name']} taxonomy
 $taxonomy_export
@@ -169,7 +170,7 @@ RAW;
 
       }
 
-      // Unset unnecessary properties
+      // Unset unnecessary properties.
       $field = $all_fields[$field_name];
       unset($field['translatable']);
       unset($field['entity_types']);
@@ -184,7 +185,7 @@ RAW;
       unset($field['foreign keys']);
       unset($field['storage']);
 
-      // Export the field as code
+      // Export the field as code.
       $field_export = '$field = ' . content_type_export_var_export_reformat($field) . ';';
       $export .= <<<RAW
 // $field_name field
@@ -196,14 +197,14 @@ if (field_info_field(\$field['field_name']) === NULL) {
 
 RAW;
 
-
       // Field collections!
       // If the current field is the name of a bundle also, then we need to
       // export fields in that bundle as well!
       $field_is_collection = FALSE;
       foreach ($all_fields as $other_field_name => $other_field_details) {
-        if ($field_name === $other_field_name)
+        if ($field_name === $other_field_name) {
           continue;
+        }
 
         if (!empty($other_field_details['bundles']['field_collection_item']) && in_array($field_name, $other_field_details['bundles']['field_collection_item'])) {
           $field_is_collection = TRUE;
@@ -220,7 +221,7 @@ RAW;
 }
 
 /**
- * Attach specific instances of defined fields to the content type being exported
+ * Attach specific instances of defined fields to thise content type.
  */
 function content_type_export_dump_instances_as_code($bundle_name, $entity_type = 'node', $fields = NULL, $update = FALSE) {
 
@@ -230,10 +231,12 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
 
   // Go through all the fields in this Drupal instance.
   foreach ($all_fields as $field_name => $field_details) {
-    if ($field_name == 'body' && is_null($fields))
+    if ($field_name == 'body' && is_null($fields)) {
       continue;
+    }
 
-    // If the current field is attached to the current bundle, we'll need to export it
+    // If the current field is attached to the current bundle, we'll need to
+    // export it.
     if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
       // Unset unnecessary properties
       $instance = field_read_instance($entity_type, $field_name, $bundle_name);
@@ -241,7 +244,7 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
       unset($instance['field_id']);
 
       // Export the instance as code
-      $instance_export =  '$instance = ' . content_type_export_var_export_reformat($instance) . ';';
+      $instance_export = '$instance = ' . content_type_export_var_export_reformat($instance) . ';';
       if ($update) {
         $export .= <<<RAW
 // $field_name instance
@@ -261,10 +264,9 @@ if (field_info_instance('$entity_type', '$field_name', '$bundle_name') === NULL)
 RAW;
       }
 
-
-      // Field collections!
+      // Field collections.
       // If the current field is the name of a bundle also, then we need to
-      // export fields in that bundle as well!
+      // export fields in that bundle as well.
       $field_is_collection = FALSE;
       foreach ($all_fields as $other_field_name => $other_field_details) {
         if ($field_name === $other_field_name) {
