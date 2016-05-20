@@ -238,12 +238,12 @@ function content_type_export_dump_instances_as_code($bundle_name, $entity_type =
     // If the current field is attached to the current bundle, we'll need to
     // export it.
     if (!empty($field_details['bundles'][$entity_type]) && in_array($bundle_name, $field_details['bundles'][$entity_type])) {
-      // Unset unnecessary properties
+      // Unset unnecessary properties.
       $instance = field_read_instance($entity_type, $field_name, $bundle_name);
       unset($instance['id']);
       unset($instance['field_id']);
 
-      // Export the instance as code
+      // Export the instance as code.
       $instance_export = '$instance = ' . content_type_export_var_export_reformat($instance) . ';';
       if ($update) {
         $export .= <<<RAW
@@ -287,7 +287,7 @@ RAW;
 }
 
 /**
- * Dump the variable to PHP code and then perform some basic reformatting
+ * Dump the variable to PHP code and then perform some basic reformatting.
  */
 function content_type_export_var_export_reformat($var) {
   // Dump the variable and store the dump output for processing.
@@ -301,7 +301,7 @@ function content_type_export_var_export_reformat($var) {
 }
 
 /**
- * Generate the whole .install file
+ * Generate the whole .install file.
  */
 function content_type_export_install_file($content) {
   $type = $content['bundle_export']['#value'];
