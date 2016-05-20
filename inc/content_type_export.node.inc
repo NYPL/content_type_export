@@ -5,8 +5,7 @@
  */
 
 /**
- * Attempts to output PHP code which can re-create a content type for use in a
- * module.
+ * Attempts to output PHP code which can re-create a content type.
  */
 function content_type_export_node_task($bundle) {
   $content = array();
@@ -40,7 +39,7 @@ function content_type_export_node_task($bundle) {
     '#value' => content_type_export_install_file($content),
     '#resizable' => TRUE,
     '#attributes' => array(
-      'style' => 'height: 500px'
+      'style' => 'height: 500px',
     ),
   );
   return $content;
@@ -50,11 +49,11 @@ function content_type_export_node_task($bundle) {
  * Export the basic properties needed to create a new content type in a module.
  */
 function content_type_export_dump_bundle_as_code($bundle) {
-  // Convert to an array for easy editing
+  // Convert to an array for easy editing.
   $bundle = (array)$bundle;
   $export = '';
 
-  // Unset default properties
+  // Unset default properties.
   unset($bundle['module']);
   unset($bundle['help']);
   unset($bundle['has_title']);
@@ -65,9 +64,9 @@ function content_type_export_dump_bundle_as_code($bundle) {
   unset($bundle['disabled_changed']);
   unset($bundle['locked']);
 
-  // Output PHP code to create the bundle
-  $bundle_export = '$bundle = '. content_type_export_var_export_reformat($bundle) .';';
-  $export .=<<<RAW
+  // Output PHP code to create the bundle.
+  $bundle_export = '$bundle = '. content_type_export_var_export_reformat($bundle) . ';';
+  $export .= <<<RAW
 // {$bundle['name']} content type
 $bundle_export
 

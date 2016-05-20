@@ -7,7 +7,7 @@
 /**
  * Implements hook_menu().
  */
-function node_to_code_menu () {
+function node_to_code_menu() {
   $items = array();
   $items['node/%node/export'] = array(
     'title' => 'Export',
@@ -50,7 +50,7 @@ function node_to_code_export($node) {
         if ($field_info['type'] == 'paragraphs') {
           $add_field_to_node = FALSE;
 
-          foreach ($field as $lang => $items) {
+          foreach ($field as $items) {
             foreach ($items as $item) {
               $paragraph = paragraphs_item_load($item['value']);
 
@@ -85,7 +85,8 @@ function node_to_code_export($node) {
         $export .= '$node->' . $k . ' = ' . $exported . ';' . PHP_EOL;
       }
 
-    } else {
+    }
+    else {
       $value = is_numeric($v) ? $v : "'" . $v . "'";
       $export .= '$node->' . $k . ' = ' . $value . ';' . PHP_EOL;
     }

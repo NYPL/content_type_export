@@ -26,8 +26,8 @@ function img_style_to_code_menu() {
 function img_style_to_code_form_image_style_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['name']['#default_value'])) {
     $form['export_link'] = array(
-      '#markup' => l('Export image style to code', 'admin/config/media/image-styles/edit/' . $form['name']['#default_value'] . '/export', array('attributes' => array('class' => array('button')))),
-      '#weight' => -1
+      '#markup' => l(t('Export image style to code'), 'admin/config/media/image-styles/edit/' . $form['name']['#default_value'] . '/export', array('attributes' => array('class' => array('button')))),
+      '#weight' => -1,
     );
   }
 }
@@ -46,7 +46,7 @@ if (empty(\$style)) {
 RAW;
 
   foreach ($image_style['effects'] as $effect) {
-    // Unset properties not required
+    // Unset properties not required.
     unset($effect['ieid']);
     $effect['isid'] = '__style_isid__';
     $exported = content_type_export_var_export_reformat($effect);

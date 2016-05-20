@@ -5,8 +5,7 @@
  */
 
 /**
- * Attempts to output PHP code which can re-create a vocabulary for use in a
- * module.
+ * Attempts to output PHP code which can re-create a vocabulary.
  */
 function content_type_export_taxonomy_vocabulary($vocabulary) {
   $content = array();
@@ -40,15 +39,14 @@ function content_type_export_taxonomy_vocabulary($vocabulary) {
     '#value' => content_type_export_install_file($content),
     '#resizable' => TRUE,
     '#attributes' => array(
-      'style' => 'height: 500px'
+      'style' => 'height: 500px',
     ),
   );
   return $content;
 }
 
 /**
- * Export the basic properties needed to create a new taxonomy vocabulary in a
- * module.
+ * Export the basic properties needed to create a new taxonomy vocabulary.
  */
 function content_type_export_dump_taxonomy_vocabulary_as_code($vocabulary) {
   $export = "\$vocabulary = (object) array(

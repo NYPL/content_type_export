@@ -5,8 +5,7 @@
  */
 
 /**
- * Attempts to output PHP code which can re-create a entityform_type for use in
- * a module.
+ * Attempts to output PHP code which can re-create a entityform_type.
  */
 function content_type_export_entityform($entityform_type) {
 
@@ -49,14 +48,13 @@ function content_type_export_entityform($entityform_type) {
 }
 
 /**
- * Export the basic properties needed to create a new entityform_type in a
- * module.
+ * Export the basic properties needed to create a new entityform_type.
  */
 function content_type_export_dump_entityform_type_as_code($entityform_type) {
 
   $entityform_type = (array) $entityform_type;
 
-  // Remove private properties
+  // Remove private properties.
   foreach ($entityform_type as $k => $v) {
     if (ord($k) === 0) {
       unset($entityform_type[$k]);
