@@ -9,6 +9,17 @@ FUNCTIONALITY
 This module adds an export tab to entity edit pages allowing you to export field
 and field instance definitions.
 
+The export page works for the following entity types:
+  - Node
+      Home » Administration » Structure » Content types » {YOUR_BUNDLE} » Export
+  - Entity form types
+      Home » Administration » Structure » Entityform Types » {YOUR_ENTITY_FORM_TYPE}  » Export
+  - Taxonomy
+      Home » Administration » Structure » Taxonomy » {YOUR_TAXONOMY} » Export
+
+It is also possible to export individual fields attached to commerce customer
+profile types. Edit the field definition and an export tab will be there.
+
 The export page has the following code snippets:
   - Content type
       Code to create the bundle for this entity type.
@@ -22,15 +33,6 @@ The export page has the following code snippets:
       Copying this code to your modules install file and replacing MY_MODULE
       with the name of your module will be all you need to do to create the
       given bundle and create and attach all the fields.
-
-
-The export page works for the following entity types:
-  - Node
-      Home » Administration » Structure » Content types » {YOUR_BUNDLE} » Export
-  - Entity form types
-      Home » Administration » Structure » Entityform Types » {YOUR_ENTITY_FORM_TYPE}  » Export
-  - Taxonomy
-      Home » Administration » Structure » Taxonomy » {YOUR_TAXONOMY} » Export
 
 
 Exporting individual fields
