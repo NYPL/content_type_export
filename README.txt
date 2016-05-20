@@ -1,7 +1,9 @@
 OVERVIEW
 ==============
-Content type export is for exporting configuration to code that can be put in
-a custom modules install file.
+This is a module for module developers.
+It aims to speed up module development by making it easier to create bundles and
+fields though the UI and then export them to code to put into a modules install
+file or update hook.
 
 
 FUNCTIONALITY
