@@ -40,6 +40,21 @@ function content_type_export_menu() {
     'weight' => 100,
   );
 
+  if (function_exists('commerce_product_types')) {
+    foreach (commerce_product_types() as $product_type) {
+      // Convert underscores to hyphens for the menu item argument.
+      $type_arg = strtr($product_type['type'], '_', '-');
+      $items['admin/commerce/products/types/' . $type_arg . '/fields/%field_ui_menu/export'] = array(
+        'title' => 'Export',
+        'page callback' => 'content_type_export_commerce_product_field',
+        'page arguments' => array(4, 6),
+        'access arguments' => array('administer content'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 100,
+      );
+    }
+  }
+
   if (function_exists('commerce_customer_profile_types')) {
     foreach (commerce_customer_profile_types() as $type => $profile_type) {
       // Convert underscores to hyphens for the menu item argument.
@@ -87,6 +102,16 @@ function content_type_export_menu() {
 function content_type_export_profile_field($profile_type, $field_name) {
   $bundle = (object) ['type' => $profile_type, 'entity_type' => 'commerce_customer_profile'];
   $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type);
+  return content_type_export_field($bundle, $instance);
+}
+
+/**
+ * Export fields for a commerce product.
+ */
+function content_type_export_commerce_product_field($product_type, $field) {
+  $product_type = str_replace('-', '_', $product_type);
+  $bundle = (object) ['type' => $product_type, 'entity_type' => 'commerce_product'];
+  $instance = field_info_instance('commerce_product', $field['field_name'], $product_type);
   return content_type_export_field($bundle, $instance);
 }
 
