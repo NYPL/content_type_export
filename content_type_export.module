@@ -116,6 +116,28 @@ function content_type_export_menu() {
     );
   }
 
+  if(module_exists('bean')) {
+    $items['admin/structure/block-types/manage/%bean_type/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'bean_type_export',
+      'page arguments' => array(4),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+      'file' => 'content_type_export.bean.inc',
+      'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
+    );
+
+    $items['admin/structure/block-types/manage/%bean_type/fields/%field_ui_menu/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'content_type_export_field',
+      'page arguments' => array(4, 6, 'bean'),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+    );
+  }
+
   return $items;
 }
 
