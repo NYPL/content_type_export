@@ -15,13 +15,13 @@ function bean_type_export($bundle) {
   $content['fields_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Fields',
-    '#value' => content_type_export_dump_fields_as_code($bundle->type, 'paragraphs_item'),
+    '#value' => content_type_export_dump_fields_as_code($bundle->type, 'bean'),
     '#resizable' => true,
   );
   $content['instances_export'] = array(
     '#type' => 'textarea',
     '#title' => 'Instances',
-    '#value' => content_type_export_dump_instances_as_code($bundle->type, 'paragraphs_item'),
+    '#value' => content_type_export_dump_instances_as_code($bundle->type, 'bean'),
     '#resizable' => true,
   );
   $content['uninstall'] = array(
