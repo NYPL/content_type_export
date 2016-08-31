@@ -138,6 +138,19 @@ function content_type_export_menu() {
     );
   }
 
+  if(module_exists('field_collection')) {
+
+    $items['admin/structure/field-collections/%field_collection_field_name/fields/%field_ui_menu/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'content_type_export_field',
+      'page arguments' => array(3, 5, 'field_collection_item'),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+    );
+
+  }
+
   return $items;
 }
 
@@ -170,7 +183,10 @@ function content_type_export_field($bundle, $field, $entity_type = NULL) {
 
   drupal_set_title('Export ' . $field['label']);
 
-  if (!empty($bundle->vid)) {
+  if (is_string($bundle)) {
+    $bundle_name = $bundle;
+  }
+  elseif (!empty($bundle->vid)) {
     $bundle_name = $bundle->machine_name;
   }
   elseif (!empty($bundle->bundle)) {

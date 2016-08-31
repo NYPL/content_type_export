@@ -4,6 +4,7 @@ This is a module for module developers.
 It aims to speed up module development by making it easier to create bundles and
 fields though the UI and then export them to code to put into a modules install
 file or update hook.
+This module should not be enabled on production servers.
 
 
 FUNCTIONALITY
@@ -18,6 +19,11 @@ The export page works for the following entity types:
       Home » Administration » Structure » Entityform Types » {YOUR_ENTITY_FORM_TYPE}  » Export
   - Taxonomy
       Home » Administration » Structure » Taxonomy » {YOUR_TAXONOMY} » Export
+  - Field collection
+  - Paragraphs
+  - Commerce product types
+  - Entity form types
+  - Beans
 
 It is also possible to export individual fields attached to commerce customer
 profile types. Edit the field definition and an export tab will be there.
