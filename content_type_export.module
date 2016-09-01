@@ -20,16 +20,18 @@ function content_type_export_menu() {
     'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
   );
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'content_type_export_taxonomy_vocabulary',
-    'page arguments' => array(3),
-    'access arguments' => array('administer content'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 100,
-    'file' => 'content_type_export.taxonomy.inc',
-    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
-  );
+  if(module_exists('taxonomy')) {
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'content_type_export_taxonomy_vocabulary',
+      'page arguments' => array(3),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+      'file' => 'content_type_export.taxonomy.inc',
+      'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
+    );
+  }
 
   $items['admin/structure/types/manage/%node_type/fields/%field_ui_menu/export'] = array(
     'title' => 'Export',
@@ -71,16 +73,18 @@ function content_type_export_menu() {
     }
   }
 
-  $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/fields/%field_ui_menu/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'content_type_export_field',
-    'page arguments' => array(3, 5),
-    'access arguments' => array('administer content'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 100,
-    'file' => 'content_type_export.taxonomy.inc',
-    'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
-  );
+  if(module_exists('taxonomy')) {
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/fields/%field_ui_menu/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'content_type_export_field',
+      'page arguments' => array(3, 5),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+      'file' => 'content_type_export.taxonomy.inc',
+      'file path' => drupal_get_path('module', 'content_type_export') . '/inc',
+    );
+  }
 
   if(module_exists('entityform')) {
     $items['admin/structure/entityform_types/manage/%entity_object/export'] = array(
