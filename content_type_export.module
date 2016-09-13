@@ -173,6 +173,15 @@ function content_type_export_menu() {
     }
   }
 
+  $items['admin/config/people/accounts/fields/%field_ui_menu/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'content_type_export_field',
+    'page arguments' => array('user', 5, 'user'),
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+  );
+
   return $items;
 }
 
