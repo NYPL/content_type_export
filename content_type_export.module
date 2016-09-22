@@ -173,6 +173,19 @@ function content_type_export_menu() {
     }
   }
 
+  if(module_exists('commerce')) {
+
+    $items['admin/commerce/config/order/fields/%field_ui_menu/export'] = array(
+      'title' => 'Export',
+      'page callback' => 'content_type_export_field',
+      'page arguments' => array('commerce_order', 5, 'commerce_order'),
+      'access arguments' => array('administer content'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+    );
+
+  }
+
   $items['admin/config/people/accounts/fields/%field_ui_menu/export'] = array(
     'title' => 'Export',
     'page callback' => 'content_type_export_field',
@@ -254,6 +267,31 @@ function content_type_export_field($bundle, $field, $entity_type = NULL) {
     '#value' => content_type_export_dump_instances_as_code($bundle_name, $entity_type, $single_field, TRUE),
     '#resizable' => TRUE,
   );
+
+  if($field['widget']['module'] == 'field_collection') {
+
+    $content['field_collection_bundle'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Field collection bundle',
+      '#value' => content_type_export_dump_fields_as_code($field['field_name'], 'field_collection_item'),
+      '#resizable' => TRUE,
+    );
+
+    $content['field_collection_fields'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Field collection fields',
+      '#value' => content_type_export_dump_fields_as_code($field['field_name'], 'field_collection_item'),
+      '#resizable' => TRUE,
+    );
+
+    $content['field_collection_instances'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Field collection instances',
+      '#value' => content_type_export_dump_instances_as_code($field['field_name'], 'field_collection_item'),
+      '#resizable' => TRUE,
+    );
+
+  }
 
   return $content;
 
