@@ -195,6 +195,16 @@ function content_type_export_menu() {
     'weight' => 100,
   );
 
+  $items['admin/reports/fields/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['content_type_export_all_entity_fields'],
+    'access arguments' => array('administer content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
+    'file' => 'content_type_export.all.inc',
+  );
+
   return $items;
 }
 
@@ -303,6 +313,8 @@ function content_type_export_field($bundle, $field, $entity_type = NULL) {
 function content_type_export_dump_fields_as_code($bundle_name, $entity_type = 'node', $fields = NULL) {
 
   $all_fields = is_null($fields) ? field_info_fields() : $fields;
+
+  //dpm($all_fields, '$all_fields');
 
   $export = '';
 
