@@ -34,15 +34,15 @@ function content_type_export_all_entity_fields($form, &$form_state) {
     // Loop bundles
     foreach($entities_type_details['bundles'] as $bundle_name => $bundle_details) {
 
+      $bundle_default = isset($default_values[$entity_type]['bundles'][$bundle_name]) ? $default_values[$entity_type]['bundles'][$bundle_name] : FALSE;
+
       $form[$entity_type]['bundles'][$bundle_name] = array(
         '#type' => 'fieldset',
         '#title' => $bundle_name,
         '#collapsible' => TRUE,
-        '#collapsed' => FALSE,
+        '#collapsed' => !$bundle_default,
         '#tree' => TRUE,
       );
-
-      $bundle_default = isset($default_values[$entity_type]['bundles'][$bundle_name]) ? $default_values[$entity_type]['bundles'][$bundle_name] : FALSE;
 
       $form[$entity_type]['bundles'][$bundle_name]['include_in_export'] = array(
         '#title' => t('Include this bundle in export?'),
