@@ -460,6 +460,25 @@ RAW;
     }
   }
 
+  // Field groups.
+  if (module_exists('field_group')) {
+    $groups = field_group_info_groups($entity_type, $bundle_name, 'form');
+
+    foreach ($groups as $group_name => $group) {
+      $group_export = content_type_export_var_export_reformat((array) $group);
+
+      $export .= <<<RAW
+// group $group_name
+\$group = (object) $group_export;
+field_group_group_save(\$group);
+
+ctools_include('export');
+ctools_export_crud_enable('field_group', \$group->identifier);
+
+RAW;
+    }
+  }
+
   return $export;
 }
 
