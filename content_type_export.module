@@ -89,6 +89,7 @@ function content_type_export_menu() {
   if(module_exists('entityform')) {
     $items['admin/structure/entityform_types/manage/%entity_object/export'] = array(
       'title' => 'Export',
+      'load arguments' => array('entityform'),
       'page callback' => 'content_type_export_entityform',
       'page arguments' => array(4),
       'access arguments' => array('administer content'),
