@@ -2,7 +2,7 @@
 
 function content_type_export_all_entity_fields($form, &$form_state) {
 
-  $default_values = variable_get('content_type_export_default_export_values', []);
+  $default_values = variable_get('content_type_export_default_export_values', array());
 
   $entities_types = entity_get_info();
 
@@ -92,7 +92,7 @@ function content_type_export_all_entity_fields($form, &$form_state) {
 
 function content_type_export_all_entity_fields_submit($form, &$form_state) {
 
-  $default_values = variable_get('content_type_export_default_export_values', []);
+  $default_values = variable_get('content_type_export_default_export_values', array());
 
   form_state_values_clean($form_state);
 

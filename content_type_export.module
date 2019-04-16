@@ -199,7 +199,7 @@ function content_type_export_menu() {
   $items['admin/reports/fields/export'] = array(
     'title' => 'Export',
     'page callback' => 'drupal_get_form',
-    'page arguments' => ['content_type_export_all_entity_fields'],
+    'page arguments' => array('content_type_export_all_entity_fields'),
     'access arguments' => array('administer content'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 100,
@@ -213,7 +213,7 @@ function content_type_export_menu() {
  * Export fields for a commerce customer profile type.
  */
 function content_type_export_profile_field($profile_type, $field_name) {
-  $bundle = (object) ['type' => $profile_type, 'entity_type' => 'commerce_customer_profile'];
+  $bundle = (object) array('type' => $profile_type, 'entity_type' => 'commerce_customer_profile');
   $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type);
   return content_type_export_field($bundle, $instance);
 }
@@ -223,7 +223,7 @@ function content_type_export_profile_field($profile_type, $field_name) {
  */
 function content_type_export_commerce_product_field($product_type, $field) {
   $product_type = str_replace('-', '_', $product_type);
-  $bundle = (object) ['type' => $product_type, 'entity_type' => 'commerce_product'];
+  $bundle = (object) array('type' => $product_type, 'entity_type' => 'commerce_product');
   $instance = field_info_instance('commerce_product', $field['field_name'], $product_type);
   return content_type_export_field($bundle, $instance);
 }
